@@ -7,6 +7,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.options import Options
+import pickle
+import os
 
 # Login not required for Tock. Leave it as false to decrease reservation delay
 ENABLE_LOGIN = True
@@ -87,7 +89,7 @@ class ReserveTFL():
         print("Looking for availability on month: %s, days: %s, between times: %s and %s" % (RESERVATION_MONTH, RESERVATION_DAYS, EARLIEST_TIME, LATEST_TIME))
 
         if ENABLE_LOGIN:
-            self.login_tock()
+            self.check_cookies_and_login()
 
         while not RESERVATION_FOUND:
             time.sleep(REFRESH_DELAY_MSEC / 1000)
@@ -125,6 +127,33 @@ class ReserveTFL():
         print("Login form submitted")
         css_selector = f'[aria-label="Toggle menu open"]'
         WebDriverWait(self.driver, WEBDRIVER_TIMEOUT_DELAY_MS).until(expected_conditions.visibility_of_element_located((By.CSS_SELECTOR, css_selector)))
+
+    def save_cookies(self):
+        print("Saving cookies")
+        pickle.dump(self.driver.get_cookies(), open("cookies.pkl", "wb"))
+
+    def load_cookies(self):
+        print("Loading cookies")
+        cookies = pickle.load(open("cookies.pkl", "rb"))
+        for cookie in cookies:
+            self.driver.add_cookie(cookie)
+
+    def check_cookies_and_login(self):
+        self.driver.get("https://www.exploretock.com/tfl/login")
+        WebDriverWait(self.driver, WEBDRIVER_TIMEOUT_DELAY_MS).until(expected_conditions.presence_of_element_located((By.NAME, "email")))
+        print("Checking cookies")
+        if len(self.driver.get_cookies()) == 0:
+            print("No cookies found. Logging in")
+            self.login_tock()
+        else:
+            if os.path.exists("cookies.pkl"):
+                print("Cookies found. Loading cookies")
+                self.load_cookies()
+            else:
+                print("No cookies file found. Logging in")
+                self.login_tock()
+                self.save_cookies()
+
 
     def search_month(self):
         month_object = None
