@@ -9,7 +9,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 
 # Login not required for Tock. Leave it as false to decrease reservation delay
-ENABLE_LOGIN = False
+ENABLE_LOGIN = True
 TOCK_USERNAME = "ilyakatz@gmail.com"
 TOCK_PASSWORD = "PASSWORD"
 
@@ -22,7 +22,7 @@ RESERVATION_TIME_FORMAT = "%I:%M %p"
 # Set the time range for acceptable reservation times.
 # I.e., any available slots between 5:00 PM and 8:30 PM
 EARLIEST_TIME = "3:00 PM"
-LATEST_TIME = "8:30 PM"
+LATEST_TIME = "10:30 PM"
 RESERVATION_TIME_MIN = datetime.strptime(EARLIEST_TIME, RESERVATION_TIME_FORMAT)
 RESERVATION_TIME_MAX = datetime.strptime(LATEST_TIME, RESERVATION_TIME_FORMAT)
 
@@ -110,17 +110,29 @@ class ReserveTFL():
     def login_tock(self):
         self.driver.get("https://www.exploretock.com/tfl/login")
         WebDriverWait(self.driver, WEBDRIVER_TIMEOUT_DELAY_MS).until(expected_conditions.presence_of_element_located((By.NAME, "email")))
+        print("Logging into Tock")
         self.driver.find_element(By.NAME, "email").send_keys(TOCK_USERNAME)
+        print("Email entered")
         self.driver.find_element(By.NAME, "password").send_keys(TOCK_PASSWORD)
-        self.driver.find_element(By.CSS_SELECTOR, ".Button").click()
-        WebDriverWait(self.driver, WEBDRIVER_TIMEOUT_DELAY_MS).until(expected_conditions.visibility_of_element_located((By.CSS_SELECTOR, ".MainHeader-accountName")))
+        print("Password entered")
+        # self.driver.find_element(By.CSS_SELECTOR, "button.MuiButtonBase-root").click()
+        data_testid_value = 'login-form'
+        css_selector = f'[data-testid="{data_testid_value}"]'
+        wait = WebDriverWait(self.driver, 2)
+        form = wait.until(expected_conditions.presence_of_element_located((By.CSS_SELECTOR, css_selector)))
+        form.submit()
+
+        print("Login form submitted")
+        css_selector = f'[aria-label="Toggle menu open"]'
+        WebDriverWait(self.driver, WEBDRIVER_TIMEOUT_DELAY_MS).until(expected_conditions.visibility_of_element_located((By.CSS_SELECTOR, css_selector)))
 
     def search_month(self):
         month_object = None
 
+        print("Searching for month", RESERVATION_MONTH)
         for month in self.driver.find_elements(By.CSS_SELECTOR, "div.ConsumerCalendar-month"):
             header = month.find_element(By.CSS_SELECTOR, "div.ConsumerCalendar-monthHeading")
-            span = header.find_element(By.CSS_SELECTOR, "span.H1")
+            span = header.find_element(By.CSS_SELECTOR, "span.MuiTypography-root")
             print("Encountered month", span.text)
 
             if RESERVATION_MONTH in span.text:
@@ -133,7 +145,7 @@ class ReserveTFL():
             return False
 
         for day in month_object.find_elements(By.CSS_SELECTOR, "button.ConsumerCalendar-day.is-in-month.is-available"):
-            span = day.find_element(By.CSS_SELECTOR, "span.B2")
+            span = day.find_element(By.CSS_SELECTOR, "span.MuiTypography-root")
             print("Encountered day: " + span.text)
             if span.text in RESERVATION_DAYS:
                 print("Day %s found. Clicking button" % span.text)
