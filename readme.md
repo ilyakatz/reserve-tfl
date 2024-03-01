@@ -12,5 +12,5 @@ pip install -r prod.txt
 
 ```bash
 source tfl/bin/activate
-python3 main.py
+python3 ./reserve_tfl.py
 ```
