@@ -7,6 +7,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 import pickle
 import os
 
@@ -189,10 +192,21 @@ class ReserveTFL():
         return False
 
     def search_time(self):
+
+        more_time = self.driver.find_element("xpath", "//*[contains(text(), 'more times')]")
+        if (more_time):
+            print("More time found", more_time.text)
+            more_time.click()
+            WebDriverWait(self.driver, 10).until_not(
+                EC.presence_of_element_located((By.XPATH, "//*[contains(text(), 'more times')]"))
+            )
+            print("Element is not present anymore.")
+
+
         data_testid_value="booking-card-collapse"
         css_selector = f'[data-testid="{data_testid_value}"]'
         for item in self.driver.find_elements(By.CSS_SELECTOR, css_selector):
-            print("Encountered time item", item)
+            print("Encountered time item", item.text)
             span = item.find_element(By.CSS_SELECTOR, "span.Consumer-resultsListItemTime")
             span2 = span.find_element(By.CSS_SELECTOR, "span")
             print("Encountered time", span2.text)
