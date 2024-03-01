@@ -183,11 +183,16 @@ class ReserveTFL():
                 if self.search_time():
                     print("Time found")
                     return True
+                else:
+                    print("No available times found. Continuing next search iteration")
 
         return False
 
     def search_time(self):
-        for item in self.driver.find_elements(By.CSS_SELECTOR, "button.Consumer-resultsListItem.is-available"):
+        data_testid_value="booking-card-collapse"
+        css_selector = f'[data-testid="{data_testid_value}"]'
+        for item in self.driver.find_elements(By.CSS_SELECTOR, css_selector):
+            print("Encountered time item", item)
             span = item.find_element(By.CSS_SELECTOR, "span.Consumer-resultsListItemTime")
             span2 = span.find_element(By.CSS_SELECTOR, "span")
             print("Encountered time", span2.text)
