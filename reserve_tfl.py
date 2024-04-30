@@ -276,11 +276,15 @@ def continuous_reservations():
 
 parser = argparse.ArgumentParser(description='Description of your program')
 parser.add_argument('--debug', action='store_true', help='Enable debug mode')
+parser.add_argument('--day', type=str, help='Specify the day to search for')
 args = parser.parse_args()
 
 if args.debug:
     RESERVATION_URI = RESERVATION_URI_TEST
 else:
     RESERVATION_URI = RESERVATION_URI_PROD
+
+if args.day:
+    RESERVATION_DAY = args.day
 
 continuous_reservations()
