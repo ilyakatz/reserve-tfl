@@ -1,6 +1,7 @@
 import threading
 import time
 import argparse
+import pygame
 
 from datetime import datetime
 from selenium import webdriver
@@ -119,6 +120,17 @@ class ReserveTFL():
             print("Found availability. Sleeping for 10 minutes to complete reservation...")
             RESERVATION_FOUND = True
             time.sleep(BROWSER_CLOSE_DELAY_SEC)
+
+    def play_ping_sound(self):
+       file = './tada.mp3'
+       pygame.init()
+       pygame.mixer.init()
+       pygame.mixer.music.load(file)
+       pygame.mixer.music.play()
+       # pygame.event.wait()
+       while pygame.mixer.music.get_busy():
+           pygame.time.Clock().tick(9)
+       pygame.mixer.music.stop()
 
     def login_tock(self):
         self.driver.get("https://www.exploretock.com/tfl/login")
@@ -241,6 +253,7 @@ class ReserveTFL():
             if RESERVATION_TIME_MIN <= available_time <= RESERVATION_TIME_MAX:
                 print("Time %s found. Clicking button" % span2.text)
                 item.click()
+                self.play_ping_sound()
                 return True
 
         return False
