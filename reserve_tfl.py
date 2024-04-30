@@ -19,7 +19,7 @@ TOCK_USERNAME = "ilyakatz@gmail.com"
 TOCK_PASSWORD = "PASSWORD"
 
 # Set your specific reservation month and days
-RESERVATION_MONTH = 'February'
+RESERVATION_MONTH = 'May'
 RESERVATION_DAYS = ['14']
 RESERVATION_YEAR = '2024'
 RESERVATION_TIME_FORMAT = "%I:%M %p"
@@ -32,7 +32,7 @@ RESERVATION_TIME_MIN = datetime.strptime(EARLIEST_TIME, RESERVATION_TIME_FORMAT)
 RESERVATION_TIME_MAX = datetime.strptime(LATEST_TIME, RESERVATION_TIME_FORMAT)
 
 # Set the party size for the reservation
-RESERVATION_SIZE = 2
+RESERVATION_SIZE = 5
 
 # Multithreading configurations
 NUM_THREADS = 1
@@ -96,7 +96,7 @@ class ReserveTFL():
 
         while not RESERVATION_FOUND:
             time.sleep(REFRESH_DELAY_MSEC / 1000)
-            url = "https://www.exploretock.com/persona-san-francisco/search?date=%s-%s-02&size=%s&time=%s" % (RESERVATION_YEAR, month_num(RESERVATION_MONTH), RESERVATION_SIZE, "22%3A00")
+            url = "https://www.exploretock.com/persona-san-francisco/search?date=%s-%s-02&size=%s&time=%s" % (RESERVATION_YEAR, month_num(RESERVATION_MONTH), RESERVATION_SIZE, "19%3A00")
             print("Refreshing page: %s" % url)
             self.driver.get(url)
             # self.driver.get("https://www.exploretock.com/tfl/search?date=%s-%s-02&size=%s&time=%s" % (RESERVATION_YEAR, month_num(RESERVATION_MONTH), RESERVATION_SIZE, "22%3A00"))
@@ -193,17 +193,16 @@ class ReserveTFL():
 
     def search_time(self):
 
-        more_time = self.driver.find_element("xpath", "//*[contains(text(), 'more times')]")
-        if (more_time):
-            print("More time found", more_time.text)
-            more_time.click()
-            WebDriverWait(self.driver, 10).until_not(
-                EC.presence_of_element_located((By.XPATH, "//*[contains(text(), 'more times')]"))
-            )
-            print("Element is not present anymore.")
+        # more_time = self.driver.find_element("xpath", "//*[contains(text(), 'more times')]")
+        # if (more_time):
+        #     print("More time found", more_time.text)
+        #     more_time.click()
+        #     WebDriverWait(self.driver, 10).until_not(
+        #         EC.presence_of_element_located((By.XPATH, "//*[contains(text(), 'more times')]"))
+        #     )
 
 
-        data_testid_value="booking-card-collapse"
+        data_testid_value="search-result"
         css_selector = f'[data-testid="{data_testid_value}"]'
         for item in self.driver.find_elements(By.CSS_SELECTOR, css_selector):
             print("Encountered time item", item.text)
