@@ -76,13 +76,16 @@ MONTH_NUM = {
 
 class ReserveTFL():
     def __init__(self):
+        self.driver = self.create_driver()
+
+    def create_driver(self):
         options = Options()
         if ENABLE_PROXY:
             options.add_argument('--load-extension={}'.format(EXTENSION_PATH))
             options.add_argument('--user-data-dir={}'.format(USER_DATA_DIR))
             options.add_argument('--profile-directory=Default')
 
-        self.driver = webdriver.Chrome(options=options)
+        return webdriver.Chrome(options=options)
 
     def teardown(self):
         self.driver.quit()
