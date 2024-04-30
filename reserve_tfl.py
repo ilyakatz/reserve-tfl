@@ -9,7 +9,8 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import NoSuchElementException
 import pickle
 import os
 
@@ -20,7 +21,7 @@ TOCK_PASSWORD = "PASSWORD"
 
 # Set your specific reservation month and days
 RESERVATION_MONTH = 'May'
-RESERVATION_DAYS = ['14']
+RESERVATION_DAY = '14'
 RESERVATION_YEAR = '2024'
 RESERVATION_TIME_FORMAT = "%I:%M %p"
 
@@ -92,7 +93,7 @@ class ReserveTFL():
 
     def reserve(self):
         global RESERVATION_FOUND
-        print("Looking for availability on month: %s, days: %s, between times: %s and %s" % (RESERVATION_MONTH, RESERVATION_DAYS, EARLIEST_TIME, LATEST_TIME))
+        print("Looking for availability on month: %s, days: %s, between times: %s and %s" % (RESERVATION_MONTH, RESERVATION_DAY, EARLIEST_TIME, LATEST_TIME))
 
         if ENABLE_LOGIN:
             self.check_cookies_and_login()
@@ -182,28 +183,47 @@ class ReserveTFL():
         for day in month_object.find_elements(By.CSS_SELECTOR, "button.ConsumerCalendar-day.is-in-month.is-available"):
             span = day.find_element(By.CSS_SELECTOR, "span.MuiTypography-root")
             print("Encountered day: " + span.text)
-            if span.text in RESERVATION_DAYS:
+            if span.text == RESERVATION_DAY:
                 print("Day %s found. Clicking button" % span.text)
                 day.click()
 
+                self.see_more_times()
                 if self.search_time():
                     print("Time found")
                     return True
                 else:
-                    print("No available times found. Continuing next search iteration")
+                    print("No available times found. ")
+                    # TODO: we need to break out of the loop since see_more_times() will refresh the page
+                    # and it will break self.driver
+                    break
 
         return False
 
+    def see_more_times(self):
+        try:
+            print("Checking for more times")
+            more_time = self.driver.find_element("xpath", "//*[contains(text(), 'more times')]")
+            print("See if 'more times' are available", more_time.text)
+            if more_time:
+                print("More times found", more_time.text)
+                more_time.click()
+
+                # Wait for the page content to potentially change
+                WebDriverWait(self.driver, 10).until(EC.staleness_of(more_time))
+
+                # Re-locate the "more times" element after the page content refreshes
+                more_time = self.driver.find_element("xpath", "//*[contains(text(), 'more times')]")
+                more_time.click()
+        except StaleElementReferenceException:
+             print("StaleElementReferenceException occurred ... retrying")
+             # If StaleElementReferenceException occurs, retry the operation
+            #  self.driver = self.create_driver()
+             self.see_more_times()
+        except NoSuchElementException:
+            print("No more times found")
+            return
+
     def search_time(self):
-
-        # more_time = self.driver.find_element("xpath", "//*[contains(text(), 'more times')]")
-        # if (more_time):
-        #     print("More time found", more_time.text)
-        #     more_time.click()
-        #     WebDriverWait(self.driver, 10).until_not(
-        #         EC.presence_of_element_located((By.XPATH, "//*[contains(text(), 'more times')]"))
-        #     )
-
 
         data_testid_value="search-result"
         css_selector = f'[data-testid="{data_testid_value}"]'
