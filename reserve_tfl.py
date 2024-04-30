@@ -1,5 +1,6 @@
 import threading
 import time
+import argparse
 
 from datetime import datetime
 from selenium import webdriver
@@ -24,6 +25,9 @@ RESERVATION_MONTH = 'May'
 RESERVATION_DAY = '14'
 RESERVATION_YEAR = '2024'
 RESERVATION_TIME_FORMAT = "%I:%M %p"
+
+RESERVATION_URI_PROD = "https://www.exploretock.com/tfl"
+RESERVATION_URI_TEST = "https://www.exploretock.com/persona-san-francisco"
 
 # Set the time range for acceptable reservation times.
 # I.e., any available slots between 5:00 PM and 8:30 PM
@@ -100,7 +104,7 @@ class ReserveTFL():
 
         while not RESERVATION_FOUND:
             time.sleep(REFRESH_DELAY_MSEC / 1000)
-            url = "https://www.exploretock.com/persona-san-francisco/search?date=%s-%s-02&size=%s&time=%s" % (RESERVATION_YEAR, month_num(RESERVATION_MONTH), RESERVATION_SIZE, "19%3A00")
+            url = RESERVATION_URI + "/search?date=%s-%s-02&size=%s&time=%s" % (RESERVATION_YEAR, month_num(RESERVATION_MONTH), RESERVATION_SIZE, "19%3A00")
             print("Refreshing page: %s" % url)
             self.driver.get(url)
             # self.driver.get("https://www.exploretock.com/tfl/search?date=%s-%s-02&size=%s&time=%s" % (RESERVATION_YEAR, month_num(RESERVATION_MONTH), RESERVATION_SIZE, "22%3A00"))
@@ -269,5 +273,14 @@ def continuous_reservations():
     while True:
         execute_reservations()
 
+
+parser = argparse.ArgumentParser(description='Description of your program')
+parser.add_argument('--debug', action='store_true', help='Enable debug mode')
+args = parser.parse_args()
+
+if args.debug:
+    RESERVATION_URI = RESERVATION_URI_TEST
+else:
+    RESERVATION_URI = RESERVATION_URI_PROD
 
 continuous_reservations()

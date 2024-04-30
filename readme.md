@@ -10,7 +10,16 @@ pip install -r prod.txt
 
 ## Run
 
-```bash
+```
 source tfl/bin/activate
+```
+
+```bash
 python3 ./reserve_tfl.py
+```
+
+### Debug mode
+
+```bash
+python3 ./reserve_tfl.py --debug
 ```
