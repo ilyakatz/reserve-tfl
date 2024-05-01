@@ -22,8 +22,8 @@ TOCK_USERNAME = "ilyakatz@gmail.com"
 TOCK_PASSWORD = "PASSWORD"
 
 # Set your specific reservation month and days
-RESERVATION_MONTH = 'May'
-RESERVATION_DAY = '14'
+RESERVATION_MONTH = 'June'
+RESERVATION_DAY = '2'
 RESERVATION_YEAR = '2024'
 RESERVATION_TIME_FORMAT = "%I:%M %p"
 
@@ -32,8 +32,8 @@ RESERVATION_URI_TEST = "https://www.exploretock.com/persona-san-francisco"
 
 # Set the time range for acceptable reservation times.
 # I.e., any available slots between 5:00 PM and 8:30 PM
-EARLIEST_TIME = "3:00 PM"
-LATEST_TIME = "10:30 PM"
+EARLIEST_TIME = "4:00 PM"
+LATEST_TIME = "8:00 PM"
 RESERVATION_TIME_MIN = datetime.strptime(EARLIEST_TIME, RESERVATION_TIME_FORMAT)
 RESERVATION_TIME_MAX = datetime.strptime(LATEST_TIME, RESERVATION_TIME_FORMAT)
 
